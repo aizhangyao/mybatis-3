@@ -6,7 +6,7 @@
 <mapper namespace="user">
 
   <select id="findUserById" parameterType="int" resultType="com.aiz.pojo.User">
-    SELECT id,username FROM t_user WHERE id = #{id}
+    SELECT id,username,password,age,sex,email FROM t_user WHERE id = #{id}
   </select>
 
 </mapper>
