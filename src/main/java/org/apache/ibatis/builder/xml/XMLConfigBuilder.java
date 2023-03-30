@@ -397,21 +397,37 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   *  解析<mappers>标签
+   * @param parent  mappers标签对应的XNode对象
+   * @throws Exception
+   */
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
+      // 获取<mappers>标签的子标签
       for (XNode child : parent.getChildren()) {
+        // <package>子标签
         if ("package".equals(child.getName())) {
+          // 获取mapper接口和mapper映射文件对应的package包名
           String mapperPackage = child.getStringAttribute("name");
+          // 将包下所有的mapper接口以及它的代理对象存储到一个Map集合中，key为mapper接口类型，value为代理对象工厂
           configuration.addMappers(mapperPackage);
         } else {
+          // <mapper>子标签
+          // 获取<mapper>子标签的resource属性
           String resource = child.getStringAttribute("resource");
+          // 获取<mapper>子标签的url属性
           String url = child.getStringAttribute("url");
+          // 获取<mapper>子标签的class属性
           String mapperClass = child.getStringAttribute("class");
+          // 它们是互斥的
           if (resource != null && url == null && mapperClass == null) {
             ErrorContext.instance().resource(resource);
             try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
+              // 专门用来解析mapper映射文件
               XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource,
                   configuration.getSqlFragments());
+              // 通过XMLMapperBuilder解析mapper映射文件
               mapperParser.parse();
             }
           } else if (resource == null && url != null && mapperClass == null) {
@@ -419,10 +435,12 @@ public class XMLConfigBuilder extends BaseBuilder {
             try (InputStream inputStream = Resources.getUrlAsStream(url)) {
               XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url,
                   configuration.getSqlFragments());
+              // 通过XMLMapperBuilder解析mapper映射文件
               mapperParser.parse();
             }
           } else if (resource == null && url == null && mapperClass != null) {
             Class<?> mapperInterface = Resources.classForName(mapperClass);
+            // 将指定mapper接口以及它的代理对象存储到一个Map集合中，key为mapper接口类型，value为代理对象工厂
             configuration.addMapper(mapperInterface);
           } else {
             throw new BuilderException(

@@ -113,12 +113,19 @@ public class MapperAnnotationBuilder {
   }
 
   public void parse() {
+    // 获取mapper接口的全路径
     String resource = type.toString();
+    // 是否解析过该mapper接口
     if (!configuration.isResourceLoaded(resource)) {
+      // 先解析mapper映射文件
       loadXmlResource();
+      // 设置解析标识
       configuration.addLoadedResource(resource);
+      // Mapper构建者助手
       assistant.setCurrentNamespace(type.getName());
+      // 解析CacheNamespace注解
       parseCache();
+      // 解析CacheNamespaceRef注解
       parseCacheRef();
       for (Method method : type.getMethods()) {
         if (!canHaveStatement(method)) {
@@ -129,12 +136,14 @@ public class MapperAnnotationBuilder {
           parseResultMap(method);
         }
         try {
+          // 每个mapper接口中的方法，都解析成MappedStatement对象
           parseStatement(method);
         } catch (IncompleteElementException e) {
           configuration.addIncompleteMethod(new MethodResolver(this, method));
         }
       }
     }
+    //去检查所有的incompleteMethods,如果可以解析了.那就移除
     parsePendingMethods();
   }
 
@@ -296,17 +305,22 @@ public class MapperAnnotationBuilder {
   }
 
   void parseStatement(Method method) {
+    // 获取Mapper接口的形参类型
     final Class<?> parameterTypeClass = getParameterType(method);
+    // 解析Lang注解
     final LanguageDriver languageDriver = getLanguageDriver(method);
 
     getAnnotationWrapper(method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {
       final SqlSource sqlSource = buildSqlSource(statementAnnotation.getAnnotation(), parameterTypeClass,
           languageDriver, method);
+      // 获取该mapper接口中的方法是CRUD操作的哪一种
       final SqlCommandType sqlCommandType = statementAnnotation.getSqlCommandType();
       final Options options = getAnnotationWrapper(method, false, Options.class).map(x -> (Options) x.getAnnotation())
           .orElse(null);
+      // 组装mappedStatementId
       final String mappedStatementId = type.getName() + "." + method.getName();
 
+      // 主键生成器，用于主键返回
       final KeyGenerator keyGenerator;
       String keyProperty = null;
       String keyColumn = null;
@@ -352,6 +366,7 @@ public class MapperAnnotationBuilder {
         }
       }
 
+      // 处理ResultMap注解
       String resultMapId = null;
       if (isSelect) {
         ResultMap resultMapAnnotation = method.getAnnotation(ResultMap.class);
@@ -362,6 +377,7 @@ public class MapperAnnotationBuilder {
         }
       }
 
+      // 通过Mapper构建助手，创建一个MappedStatement对象，封装信息
       assistant.addMappedStatement(mappedStatementId, sqlSource, statementType, sqlCommandType, fetchSize, timeout,
           // ParameterMapID
           null, parameterTypeClass, resultMapId, getReturnType(method, type), resultSetType, flushCache, useCache,
