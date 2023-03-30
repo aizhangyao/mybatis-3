@@ -189,22 +189,31 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   public List<Object> handleResultSets(Statement stmt) throws SQLException {
     ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
 
+    // <select>标签的resultMap属性，可以指定多个值，多个值之间用逗号（,）分割
     final List<Object> multipleResults = new ArrayList<>();
 
     int resultSetCount = 0;
+    // 这里是获取第一个结果集，将传统JDBC的ResultSet包装成一个包含结果列元信息的ResultSetWrapper对象
     ResultSetWrapper rsw = getFirstResultSet(stmt);
 
+    // 这里是获取所有要映射的ResultMap（按照逗号分割出来的）
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
+    // 要映射的ResultMap的数量
     int resultMapCount = resultMaps.size();
     validateResultMapsCount(rsw, resultMapCount);
+    // 循环处理每个ResultMap，从第一个开始处理
     while (rsw != null && resultMapCount > resultSetCount) {
+      // 得到结果映射信息
       ResultMap resultMap = resultMaps.get(resultSetCount);
+      // 处理结果集
+      // 从rsw结果集参数中获取查询结果，再根据resultMap映射信息，将查询结果映射到multipleResults中
       handleResultSet(rsw, resultMap, multipleResults, null);
       rsw = getNextResultSet(stmt);
       cleanUpAfterHandlingResultSet();
       resultSetCount++;
     }
 
+    // 对应<select>标签的resultSets属性，一般不使用该属性
     String[] resultSets = mappedStatement.getResultSets();
     if (resultSets != null) {
       while (rsw != null && resultSetCount < resultSets.length) {
@@ -220,6 +229,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       }
     }
 
+    // 如果只有一个结果集合，则直接从多结果集中取出第一个
     return collapseSingleResultList(multipleResults);
   }
 
