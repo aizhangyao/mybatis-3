@@ -47,6 +47,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     super(configuration);
     this.context = context;
     this.parameterType = parameterType;
+    // 初始化动态SQL中的节点处理器集合
     initNodeHandlerMap();
   }
 
@@ -63,11 +64,17 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   public SqlSource parseScriptNode() {
+    // 解析select\insert\ update\delete标签中的SQL语句，最终将解析到的SqlNode封装到MixedSqlNode中的List集合中
+    // ****将带有${}号的SQL信息封装到TextSqlNode
+    // ****将带有#{}号的SQL信息封装到StaticTextSqlNode
+    // ****将动态SQL标签中的SQL信息分别封装到不同的SqlNode中
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
     SqlSource sqlSource;
+    // 如果SQL中包含${}和动态SQL语句，则将SqlNode封装到DynamicSqlSource
     if (isDynamic) {
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
+      // 如果SQL中包含#{}，则将SqlNode封装到RawSqlSource中，并指定parameterType
       sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType);
     }
     return sqlSource;
@@ -75,25 +82,35 @@ public class XMLScriptBuilder extends BaseBuilder {
 
   protected MixedSqlNode parseDynamicTags(XNode node) {
     List<SqlNode> contents = new ArrayList<>();
+    //获取<select>\<insert>等4个标签的子节点，子节点包括元素节点和文本节点
     NodeList children = node.getNode().getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
       XNode child = node.newXNode(children.item(i));
+      // 处理文本节点
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
         String data = child.getStringBody("");
+        // 将文本内容封装到SqlNode中
         TextSqlNode textSqlNode = new TextSqlNode(data);
+        // SQL语句中带有${}的话，就表示是dynamic的
         if (textSqlNode.isDynamic()) {
           contents.add(textSqlNode);
           isDynamic = true;
         } else {
+          // SQL语句中（除了${}和下面的动态SQL标签），就表示是static的
+          // StaticTextSqlNode的apply只是进行字符串的追加操作
           contents.add(new StaticTextSqlNode(data));
         }
+        //处理元素节点
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
         String nodeName = child.getNode().getNodeName();
+        // 动态SQL标签处理器
+        // 思考，此处使用了哪种设计模式？---策略模式
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
         handler.handleNode(child, contents);
+        // 动态SQL标签是dynamic的
         isDynamic = true;
       }
     }
