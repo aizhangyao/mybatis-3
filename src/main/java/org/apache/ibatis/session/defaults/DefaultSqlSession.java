@@ -292,6 +292,7 @@ public class DefaultSqlSession implements SqlSession {
 
   @Override
   public <T> T getMapper(Class<T> type) {
+    // 从Configuration对象中，根据Mapper接口，获取Mapper代理对象
     return configuration.getMapper(type, this);
   }
 
