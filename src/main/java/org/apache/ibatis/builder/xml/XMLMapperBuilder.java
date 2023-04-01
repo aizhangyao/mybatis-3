@@ -131,6 +131,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       // 解析<cache-ref>子标签
       cacheRefElement(context.evalNode("cache-ref"));
       // 解析<cache>子标签
+      // 最终在这里看到了关于cache属性的处理
       cacheElement(context.evalNode("cache"));
       // 解析<parameterMap>子标签
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
@@ -139,6 +140,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       // 解析<sql>子标签，也就是SQL片段
       sqlElement(context.evalNodes("/mapper/sql"));
       // 解析<select>\<insert>\<update>\<delete>子标签
+      // 这里会将生成的Cache包装到对应的MappedStatement
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
@@ -227,6 +229,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private void cacheElement(XNode context) {
     if (context != null) {
+      //解析<cache/>标签的type属性，这里我们可以自定义cache的实现类，比如redisCache，如果没有自定义，这里使用和一级缓存相同的PERPETUAL
       String type = context.getStringAttribute("type", "PERPETUAL");
       Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type);
       String eviction = context.getStringAttribute("eviction", "LRU");
@@ -236,6 +239,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       boolean readWrite = !context.getBooleanAttribute("readOnly", false);
       boolean blocking = context.getBooleanAttribute("blocking", false);
       Properties props = context.getChildrenAsProperties();
+      // 构建Cache对象
       builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
     }
   }

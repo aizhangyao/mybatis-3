@@ -177,7 +177,9 @@ public class CachingExecutor implements Executor {
   }
 
   private void flushCacheIfRequired(MappedStatement ms) {
+    //获取MappedStatement对应的Cache，进行清空
     Cache cache = ms.getCache();
+    //SQL需设置flushCache="true" 才会执行清空
     if (cache != null && ms.isFlushCacheRequired()) {
       tcm.clear(cache);
     }

@@ -117,6 +117,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     return configuration;
   }
 
+  // 既然是在xml中添加的，那么我们就直接看关于mappers标签的解析
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first

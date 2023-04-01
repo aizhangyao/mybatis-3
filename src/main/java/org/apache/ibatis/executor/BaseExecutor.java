@@ -201,11 +201,16 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
+    //初始化CacheKey
     CacheKey cacheKey = new CacheKey();
+    //存入statementId
     cacheKey.update(ms.getId());
+    //分别存入分页需要的Offset和Limit
     cacheKey.update(rowBounds.getOffset());
     cacheKey.update(rowBounds.getLimit());
+    //把从BoundSql中封装的sql取出并存入到cacheKey对象中
     cacheKey.update(boundSql.getSql());
+    //下面这一块就是封装参数
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
     TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
     // mimic DefaultParameterHandler logic
@@ -226,10 +231,27 @@ public abstract class BaseExecutor implements Executor {
         cacheKey.update(value);
       }
     }
+    //从configuration对象中（也就是载入配置文件后存放的对象）把EnvironmentId存入
+    /**
+     *     <environments default="development">
+     *         <environment id="development"> //就是这个id
+     *             <!--当前事务交由JDBC进行管理-->
+     *             <transactionManager type="JDBC"></transactionManager>
+     *             <!--当前使用mybatis提供的连接池-->
+     *             <dataSource type="POOLED">
+     *                 <property name="driver" value="${jdbc.driver}"/>
+     *                 <property name="url" value="${jdbc.url}"/>
+     *                 <property name="username" value="${jdbc.username}"/>
+     *                 <property name="password" value="${jdbc.password}"/>
+     *             </dataSource>
+     *         </environment>
+     *     </environments>
+     */
     if (configuration.getEnvironment() != null) {
       // issue #176
       cacheKey.update(configuration.getEnvironment().getId());
     }
+    //返回
     return cacheKey;
   }
 

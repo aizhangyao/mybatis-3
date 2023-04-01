@@ -4,8 +4,16 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.aiz.mapper.UserMapper">
+  <!--type：cache使用的类型，默认是PerpetualCache，这在一级缓存中提到过。
+      eviction： 定义回收的策略，常见的有FIFO，LRU。
+      flushInterval： 配置一定时间自动刷新缓存，单位是毫秒。
+      size： 最多缓存对象的个数。
+      readOnly： 是否只读，若配置可读写，则需要对应的实体类能够序列化。
+      blocking： 若缓存中找不到对应的key，是否会一直blocking，直到有对应的数据进入缓存。
+      -->
+  <cache></cache>
 
-  <select id="findUserById" parameterType="int" resultType="com.aiz.pojo.User">
+  <select id="findUserById" parameterType="int" resultType="com.aiz.pojo.User" useCache="true">
     SELECT id,username,password,age,sex,email FROM t_user WHERE id = #{id}
   </select>
 
@@ -13,4 +21,17 @@
     SELECT id,username,password,age,sex,email FROM t_user
   </select>
 
+  <!--useCache默认值也是true-->
+  <select id="findByCondition" parameterType="int" resultType="com.aiz.pojo.User" useCache="true" >
+    SELECT id,username FROM  t_user WHERE id = #{id}
+  </select>
+
+  <update id="updateUser" parameterType="com.aiz.pojo.User" >
+    update t_user set username = #{username} where id = #{id}
+  </update>
+
+  <!-- 执行此语句清空缓存 -->
+  <select id="findbyId" resultType="com.aiz.pojo.User" useCache="true" flushCache="true" >
+    select * from t_user
+  </select>
 </mapper>

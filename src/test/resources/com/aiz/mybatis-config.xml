@@ -4,6 +4,11 @@
   "http://mybatis.org/dtd/mybatis-3-config.dtd">
 
 <configuration>
+
+  <settings>
+    <setting name="cacheEnabled" value="true"/>
+  </settings>
+
   <plugins>
     <plugin interceptor="com.aiz.interceptor.MyPlugin">
       <property name="dialect" value="mysql" />

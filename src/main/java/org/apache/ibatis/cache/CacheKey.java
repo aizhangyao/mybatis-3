@@ -53,6 +53,7 @@ public class CacheKey implements Cloneable, Serializable {
   private int count;
   // 8/21/2017 - Sonarlint flags this as needing to be marked transient. While true if content is not serializable, this
   // is not always true and thus should not be marked transient.
+  //值存入的地方
   private List<Object> updateList;
 
   public CacheKey() {
@@ -79,7 +80,7 @@ public class CacheKey implements Cloneable, Serializable {
     baseHashCode *= count;
 
     hashcode = multiplier * hashcode + baseHashCode;
-
+    //看到把值传入到了一个list中
     updateList.add(object);
   }
 

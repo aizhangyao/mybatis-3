@@ -1,5 +1,7 @@
 package com.aiz.pojo;
 
+import java.io.Serializable;
+
 /**
  * @author ZhangYao
  * @version 1.0
@@ -7,7 +9,7 @@ package com.aiz.pojo;
  * @description User
  * @date Create in 23:45 2023/3/27
  */
-public class User {
+public class User implements Serializable {
   private Integer id;
 
   private String username;
