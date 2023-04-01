@@ -22,12 +22,18 @@ import java.util.Properties;
  */
 public interface Interceptor {
 
+  /**
+   * 真正方法被拦截执行的逻辑
+   * @param invocation  主要目的是将多个参数进行封装
+   */
   Object intercept(Invocation invocation) throws Throwable;
 
+  // 生成目标对象的代理对象
   default Object plugin(Object target) {
     return Plugin.wrap(target, this);
   }
 
+  // 可以拦截器设置一些属性
   default void setProperties(Properties properties) {
     // NOP
   }

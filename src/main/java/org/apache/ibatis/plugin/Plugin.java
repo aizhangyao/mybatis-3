@@ -42,12 +42,17 @@ public class Plugin implements InvocationHandler {
   }
 
   public static Object wrap(Object target, Interceptor interceptor) {
+    // 1.解析该拦截器所拦截的所有接口及对应拦截接口的方法
     Map<Class<?>, Set<Method>> signatureMap = getSignatureMap(interceptor);
     Class<?> type = target.getClass();
+    // 2.获取目标对象实现的所有被拦截的接口
     Class<?>[] interfaces = getAllInterfaces(type, signatureMap);
+    // 3.目标对象有实现被拦截的接口，生成代理对象并返回
     if (interfaces.length > 0) {
+      // 通过JDK动态代理的方式实现
       return Proxy.newProxyInstance(type.getClassLoader(), interfaces, new Plugin(target, interceptor, signatureMap));
     }
+    // 目标对象没有实现被拦截的接口，直接返回原对象
     return target;
   }
 

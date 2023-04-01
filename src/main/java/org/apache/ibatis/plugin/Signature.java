@@ -36,6 +36,7 @@ public @interface Signature {
    *
    * @return the java type
    */
+  // 拦截的类
   Class<?> type();
 
   /**
@@ -43,6 +44,7 @@ public @interface Signature {
    *
    * @return the method name
    */
+  // 拦截的方法
   String method();
 
   /**
@@ -50,5 +52,6 @@ public @interface Signature {
    *
    * @return java types for method argument
    */
+  // 拦截方法的参数
   Class<?>[] args();
 }

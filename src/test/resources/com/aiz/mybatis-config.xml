@@ -4,6 +4,11 @@
   "http://mybatis.org/dtd/mybatis-3-config.dtd">
 
 <configuration>
+  <plugins>
+    <plugin interceptor="com.aiz.interceptor.MyPlugin">
+      <property name="dialect" value="mysql" />
+    </plugin>
+  </plugins>
 
   <!--第一部分：数据源配置-->
   <environments default="development">

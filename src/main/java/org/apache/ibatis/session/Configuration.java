@@ -751,6 +751,7 @@ public class Configuration {
       BoundSql boundSql) {
     ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement,
         parameterObject, boundSql);
+    // 生成ParameterHandler代理对象逻辑
     return (ParameterHandler) interceptorChain.pluginAll(parameterHandler);
   }
 
@@ -758,6 +759,7 @@ public class Configuration {
       ParameterHandler parameterHandler, ResultHandler resultHandler, BoundSql boundSql) {
     ResultSetHandler resultSetHandler = new DefaultResultSetHandler(executor, mappedStatement, parameterHandler,
         resultHandler, boundSql, rowBounds);
+    // 生成ResultSetHandler代理对象逻辑
     return (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);
   }
 
@@ -766,6 +768,7 @@ public class Configuration {
     // 创建路由功能的StatementHandler，根据MappedStatement中的StatementType
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject,
         rowBounds, resultHandler, boundSql);
+    // 生成StatementHandler代理对象逻辑
     return (StatementHandler) interceptorChain.pluginAll(statementHandler);
   }
 
@@ -786,6 +789,7 @@ public class Configuration {
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+    // 生成Executor代理对象逻辑
     return (Executor) interceptorChain.pluginAll(executor);
   }
 
